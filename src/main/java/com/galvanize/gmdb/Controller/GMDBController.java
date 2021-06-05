@@ -1,6 +1,7 @@
 package com.galvanize.gmdb.Controller;
 
 import com.galvanize.gmdb.Domain.GMDBMovie;
+import com.galvanize.gmdb.Domain.Review;
 import com.galvanize.gmdb.Service.GMDBService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -34,9 +35,9 @@ public class GMDBController {
         return new ResponseEntity("The movie you searched on is not found",HttpStatus.NOT_FOUND);
     }
     @PatchMapping("/movies/rating")
-    public ResponseEntity<GMDBMovie> updateRating(@RequestParam("title") String title,@RequestParam("rating") int rating) {
-        if (rating >= 0 && rating <= 5) {
-            GMDBMovie movie = service.updateRating(title, rating);
+    public ResponseEntity<GMDBMovie> updateRating(@RequestParam("title") String title, @RequestBody Review review) {
+        if (review.getRating() >= 0 && review.getRating() <= 5) {
+            GMDBMovie movie = service.updateRating(title, review);
             return new ResponseEntity(movie, HttpStatus.OK);
 
         }

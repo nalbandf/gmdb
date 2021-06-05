@@ -13,6 +13,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultMatcher;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -39,24 +41,24 @@ class GmdbTest {
     // Mock beans help Spring automate injecting other Autowired objects
     @MockBean
 //    @InjectMocks
-    GMDBService service;
+            GMDBService service;
 
     @Test
     void getEmptyMovie() throws Exception {
-        List<GMDBMovie> movieList=new ArrayList<>();
+        List<GMDBMovie> movieList = new ArrayList<>();
         // this method is from the Mockito library
         when(service.findAll()).thenReturn(movieList);
         mvc.perform(get("/gmdb/movies"))
-                .andExpect(status().isOk())
-        .andExpect(content().string(""));
+                .andExpect(status().isOk());
 
     }
+
     @Test
-    void postMovie()throws Exception{
-        GMDBMovie movie=new GMDBMovie("abc",  "tim",  "actors",  "2016",  "description",  2);
+    void postMovie() throws Exception {
+        GMDBMovie movie = new GMDBMovie("abc", "tim", "actors", "2016", "description");
 
         when(service.createMovie(movie)).thenReturn(movie);
-        String json=" {\n\"title\": \"Kanguri\",\n \"director\": \"Joss Whedon\",\n\"actors\": \"Robert Downey Jr., Chris Evans, Mark Ruffalo, Chris Hemsworth\",\n    \"release\": \"2012\",\n    \"description\": \"Earth's mightiest heroes must come together and learn to fight as a team if they are going to stop the mischievous Loki and his alien army from enslaving humanity.\",\n    \"rating\": 2\n  }";
+        String json = " {\n\"title\": \"Kanguri\",\n \"director\": \"Joss Whedon\",\n\"actors\": \"Robert Downey Jr., Chris Evans, Mark Ruffalo, Chris Hemsworth\",\n    \"release\": \"2012\",\n    \"description\": \"Earth's mightiest heroes must come together and learn to fight as a team if they are going to stop the mischievous Loki and his alien army from enslaving humanity.\" \n   }";
         mvc
                 .perform(
                         post("/gmdb/movies")
@@ -66,9 +68,10 @@ class GmdbTest {
                 )
                 .andExpect(status().isCreated());
     }
+
     @Test
     void getMovieByTitleFound() throws Exception {
-        GMDBMovie movie=new GMDBMovie("abc",  "tim",  "actors",  "2016",  "description",  2);
+        GMDBMovie movie = new GMDBMovie("abc", "tim", "actors", "2016", "description");
         // this method is from the Mockito library
         when(service.findMovieByTitle("abc")).thenReturn(java.util.Optional.of(movie));
         mvc.perform(get("/gmdb/movies/abc"))
@@ -76,11 +79,12 @@ class GmdbTest {
                 .andExpect(jsonPath("$.title").value("abc"));
 
     }
+
     @Test
     void getAllMovie() throws Exception {
-        List<GMDBMovie> movieList=new ArrayList<>();
-        GMDBMovie movie1=new GMDBMovie("abc",  "tim",  "actors",  "2016",  "description",  2);
-        GMDBMovie movie2=new GMDBMovie("abc2",  "tim",  "actors",  "2016",  "description",  2);
+        List<GMDBMovie> movieList = new ArrayList<>();
+        GMDBMovie movie1 = new GMDBMovie("abc", "tim", "actors", "2016", "description");
+        GMDBMovie movie2 = new GMDBMovie("abc2", "tim", "actors", "2016", "description");
         movieList.add(movie1);
         movieList.add(movie2);
         when(service.findAll()).thenReturn(movieList);
@@ -89,9 +93,10 @@ class GmdbTest {
                 .andExpect(jsonPath("$[0].title").value("abc"))
                 .andExpect(jsonPath("$[1].title").value("abc2"));
     }
+
     @Test
     void getMovieByTitleNotFound() throws Exception {
-        GMDBMovie movie=new GMDBMovie("abc",  "tim",  "actors",  "2016",  "description",  2);
+        GMDBMovie movie = new GMDBMovie("abc", "tim", "actors", "2016", "description");
         // Movie Found Senario
         when(service.createMovie(movie)).thenReturn(movie);
         when(service.findMovieByTitle("abc")).thenReturn(Optional.of(movie));
@@ -105,5 +110,23 @@ class GmdbTest {
                 .andExpect(content().string("The movie you searched on is not found"));
     }
 
-    }
+    @Test
+    void updateMovieRatingTest() throws Exception {
+        GMDBMovie movie = new GMDBMovie("abc", "tim", "actors", "2016", "description");
+        when(service.createMovie(movie)).thenReturn(movie);
+        when(service.findMovieByTitle("abc")).thenReturn(Optional.of(movie));
+
+        mvc.perform(get("/gmdb/movies/abc"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.title").value("abc"));
+
+        GMDBMovie movie1 = new GMDBMovie("abc", "tim", "actors", "2016", "description");
+
+       // when(service.updateRating("abc",4)).thenReturn(movie1);
+
+        mvc.perform(patch("/gmdb/movies/rating?title=abc&rating=4"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.rating").value(2));
+        }
+}
 

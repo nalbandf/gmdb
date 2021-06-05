@@ -1,9 +1,8 @@
 package com.galvanize.gmdb.Domain;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 public class GMDBMovie {
@@ -16,19 +15,40 @@ public class GMDBMovie {
     private String actors;
     private String release;
     private String description;
-    private int rating;
+
+    @OneToMany
+    private List<Review> GMDBRating = new ArrayList<>();
+
+    public List<Review> getGMDBRating() {
+        return GMDBRating;
+    }
+
+    public void setGMDBRating(List<Review> GMDBRating) {
+        this.GMDBRating = GMDBRating;
+    }
+
+
+
 
     public GMDBMovie(){
 
     }
 
-    public GMDBMovie(String title, String director, String actors, String release, String description, int rating) {
+    public GMDBMovie(String title, String director, String actors, String release, String description) {
         this.title = title;
         this.director = director;
         this.actors = actors;
         this.release = release;
         this.description = description;
-        this.rating = rating;
+    }
+
+    public GMDBMovie(String title, String director, String actors, String release, String description, List<Review> reviewList) {
+        this.title = title;
+        this.director = director;
+        this.actors = actors;
+        this.release = release;
+        this.description = description;
+        this.GMDBRating = reviewList;
     }
 
     public String getTitle() {
@@ -71,13 +91,7 @@ public class GMDBMovie {
         this.description = description;
     }
 
-    public int getRating() {
-        return rating;
-    }
 
-    public void setRating(int rating) {
-        this.rating = rating;
-    }
 
 
 

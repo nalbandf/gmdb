@@ -1,6 +1,7 @@
 package com.galvanize.gmdb.Service;
 
 import com.galvanize.gmdb.Domain.GMDBMovie;
+import com.galvanize.gmdb.Domain.Review;
 import com.galvanize.gmdb.Repository.GMDBRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,13 +25,10 @@ public class GMDBService {
         return repository.findMovieByTitle(title);
     }
 
-    public GMDBMovie updateRating(String title, int rating) {
+    public GMDBMovie updateRating(String title, Review review) {
         GMDBMovie movie=repository.findMovieByTitle(title).get();
-        if(movie.getRating()>=0){
-            int newRating=(movie.getRating()+rating)/2;
-            movie.setRating(newRating);
+        movie.getGMDBRating().add(review);
             repository.save(movie);
-        }
         return movie;
     }
 }
