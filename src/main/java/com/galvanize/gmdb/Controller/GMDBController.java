@@ -34,14 +34,12 @@ public class GMDBController {
         return new ResponseEntity("The movie you searched on is not found",HttpStatus.NOT_FOUND);
     }
     @PatchMapping("/movies/rating")
-    public void updateRating(@RequestParam("title") String title,@RequestParam("rating") int rating){
-        if(rating>0 && rating<=5){
-            GMDBMovie movie=service.findMovieByTitle(title).get();
-            int c=movie.getRating();
+    public ResponseEntity<GMDBMovie> updateRating(@RequestParam("title") String title,@RequestParam("rating") int rating) {
+        if (rating >= 0 && rating <= 5) {
+            GMDBMovie movie = service.updateRating(title, rating);
+            return new ResponseEntity(movie, HttpStatus.OK);
+
         }
-
-
+        return new ResponseEntity("Rating not provided", HttpStatus.OK);
     }
-
-
 }

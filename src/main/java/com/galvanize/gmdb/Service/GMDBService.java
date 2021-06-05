@@ -23,4 +23,14 @@ public class GMDBService {
     public Optional<GMDBMovie> findMovieByTitle(String title) {
         return repository.findMovieByTitle(title);
     }
+
+    public GMDBMovie updateRating(String title, int rating) {
+        GMDBMovie movie=repository.findMovieByTitle(title).get();
+        if(movie.getRating()>=0){
+            int newRating=(movie.getRating()+rating)/2;
+            movie.setRating(newRating);
+            repository.save(movie);
+        }
+        return movie;
+    }
 }
