@@ -14,4 +14,8 @@ public class GMDBService {
     public Iterable<GMDBMovie> findAll(){
         return repository.findAll();
     }
+
+    public GMDBMovie createMovie(GMDBMovie movie) {
+        return repository.save(movie);
+    }
 }
