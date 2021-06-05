@@ -3,6 +3,7 @@ package com.galvanize.gmdb;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.galvanize.gmdb.Domain.GMDBMovie;
+import com.galvanize.gmdb.Domain.Review;
 import com.galvanize.gmdb.Service.GMDBService;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -112,7 +113,12 @@ class GmdbTest {
 
     @Test
     void updateMovieRatingTest() throws Exception {
-        GMDBMovie movie = new GMDBMovie("abc", "tim", "actors", "2016", "description");
+        List<Review> reviewList = new ArrayList<>();
+        Review review = new Review();
+        review.setRating(4);
+        review.setReviewText("Funny movie");
+        reviewList.add(review);
+        GMDBMovie movie = new GMDBMovie("abc", "tim", "actors", "2016", "description", reviewList);
         when(service.createMovie(movie)).thenReturn(movie);
         when(service.findMovieByTitle("abc")).thenReturn(Optional.of(movie));
 
@@ -120,13 +126,16 @@ class GmdbTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.title").value("abc"));
 
-        GMDBMovie movie1 = new GMDBMovie("abc", "tim", "actors", "2016", "description");
+        GMDBMovie movie1 = new GMDBMovie("abc", "tim", "actors", "2016", "description", reviewList);
 
        // when(service.updateRating("abc",4)).thenReturn(movie1);
+        String json = " {\n\"rating\": \"4\",\n \"reviewText\": \"JFunny movie\"\n}";
 
-        mvc.perform(patch("/gmdb/movies/rating?title=abc&rating=4"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.rating").value(2));
+        mvc.perform(patch("/gmdb/movies/rating?title=abc").contentType(MediaType.APPLICATION_JSON)
+                .characterEncoding("utf-8")
+                .content(json))
+                .andExpect(status().isOk());
+
         }
 }
 
