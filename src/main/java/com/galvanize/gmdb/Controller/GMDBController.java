@@ -7,7 +7,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.text.AttributedCharacterIterator;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/gmdb")
@@ -24,5 +26,22 @@ public class GMDBController {
     public ResponseEntity<GMDBMovie> createMovie(@RequestBody GMDBMovie movie){
         return new ResponseEntity(service.createMovie(movie),HttpStatus.CREATED);
     }
-    @Get
+    @GetMapping("/movies/{title}")
+    public ResponseEntity<GMDBMovie> findMovieById(@PathVariable("title") String title){
+        Optional<GMDBMovie> movie =service.findMovieByTitle(title);
+        if(movie.isPresent())
+            return new ResponseEntity(movie,HttpStatus.OK);
+        return new ResponseEntity("The movie you searched on is not found",HttpStatus.NOT_FOUND);
+    }
+    @PatchMapping("/movies/rating")
+    public void updateRating(@RequestParam("title") String title,@RequestParam("rating") int rating){
+        if(rating>0 && rating<=5){
+            GMDBMovie movie=service.findMovieByTitle(title).get();
+            int c=movie.getRating();
+        }
+
+
+    }
+
+
 }

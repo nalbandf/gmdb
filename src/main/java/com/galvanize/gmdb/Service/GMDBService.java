@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class GMDBService {
@@ -17,5 +18,9 @@ public class GMDBService {
 
     public GMDBMovie createMovie(GMDBMovie movie) {
         return repository.save(movie);
+    }
+
+    public Optional<GMDBMovie> findMovieByTitle(String title) {
+        return repository.findMovieByTitle(title);
     }
 }

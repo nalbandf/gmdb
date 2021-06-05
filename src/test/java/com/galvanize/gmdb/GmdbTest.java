@@ -12,9 +12,13 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-
+import org.springframework.test.web.servlet.ResultMatcher;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
+import static org.assertj.core.internal.bytebuddy.matcher.ElementMatchers.is;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.Mockito.when;
@@ -28,7 +32,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest
 class GmdbTest {
     ObjectMapper mapper;
-    List<GMDBMovie> movieList;
+
     @Autowired
     private MockMvc mvc;
 
@@ -38,7 +42,8 @@ class GmdbTest {
     GMDBService service;
 
     @Test
-    void getAllMovie() throws Exception {
+    void getEmptyMovie() throws Exception {
+        List<GMDBMovie> movieList=new ArrayList<>();
         // this method is from the Mockito library
         when(service.findAll()).thenReturn(movieList);
         mvc.perform(get("/gmdb/movies"))
@@ -48,8 +53,9 @@ class GmdbTest {
     }
     @Test
     void postMovie()throws Exception{
-        mapper=new ObjectMapper();
+        GMDBMovie movie=new GMDBMovie("abc",  "tim",  "actors",  "2016",  "description",  2);
 
+        when(service.createMovie(movie)).thenReturn(movie);
         String json=" {\n\"title\": \"Kanguri\",\n \"director\": \"Joss Whedon\",\n\"actors\": \"Robert Downey Jr., Chris Evans, Mark Ruffalo, Chris Hemsworth\",\n    \"release\": \"2012\",\n    \"description\": \"Earth's mightiest heroes must come together and learn to fight as a team if they are going to stop the mischievous Loki and his alien army from enslaving humanity.\",\n    \"rating\": 2\n  }";
         mvc
                 .perform(
@@ -59,12 +65,45 @@ class GmdbTest {
                                 .content(json)
                 )
                 .andExpect(status().isCreated());
-                //.andExpect(jsonPath("$.title").exists())
-                //.andExpect(jsonPath("$.GMDBMovie.director").value("Joss Whedon"))
-                //.andExpect(jsonPath("$.GMDBMovie.rating").value(2));
     }
+    @Test
+    void getMovieByTitleFound() throws Exception {
+        GMDBMovie movie=new GMDBMovie("abc",  "tim",  "actors",  "2016",  "description",  2);
+        // this method is from the Mockito library
+        when(service.findMovieByTitle("abc")).thenReturn(java.util.Optional.of(movie));
+        mvc.perform(get("/gmdb/movies/abc"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.title").value("abc"));
 
+    }
+    @Test
+    void getAllMovie() throws Exception {
+        List<GMDBMovie> movieList=new ArrayList<>();
+        GMDBMovie movie1=new GMDBMovie("abc",  "tim",  "actors",  "2016",  "description",  2);
+        GMDBMovie movie2=new GMDBMovie("abc2",  "tim",  "actors",  "2016",  "description",  2);
+        movieList.add(movie1);
+        movieList.add(movie2);
+        when(service.findAll()).thenReturn(movieList);
+        mvc.perform(get("/gmdb/movies"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].title").value("abc"))
+                .andExpect(jsonPath("$[1].title").value("abc2"));
+    }
+    @Test
+    void getMovieByTitleNotFound() throws Exception {
+        GMDBMovie movie=new GMDBMovie("abc",  "tim",  "actors",  "2016",  "description",  2);
+        // Movie Found Senario
+        when(service.createMovie(movie)).thenReturn(movie);
+        when(service.findMovieByTitle("abc")).thenReturn(Optional.of(movie));
+        mvc.perform(get("/gmdb/movies/abc"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.title").value("abc"));
 
+        //Movie Not Found Senario
+        mvc.perform(get("/gmdb/movies/abc2"))
+                .andExpect(status().isNotFound())
+                .andExpect(content().string("The movie you searched on is not found"));
+    }
 
     }
 
