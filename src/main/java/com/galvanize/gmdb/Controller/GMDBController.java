@@ -24,4 +24,5 @@ public class GMDBController {
     public ResponseEntity<GMDBMovie> createMovie(@RequestBody GMDBMovie movie){
         return new ResponseEntity(service.createMovie(movie),HttpStatus.CREATED);
     }
+    @
 }
